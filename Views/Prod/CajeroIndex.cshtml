@@ -1,0 +1,212 @@
+@model IEnumerable<CoffeePlace.Models.Prod>
+@{ 
+    ViewData["Title"] = "Panel de Ventas"; 
+    // Extraer categorías únicas para los filtros
+    var categorias = Model.Select(p => p.Categoria?.nombre).Distinct().Where(c => c != null).ToList();
+}
+
+<div class="row">
+    <div class="col-md-8 border-end">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 style="color: #6F4E37; font-weight: bold;">☕ Menú Digital</h2>
+            <div class="input-group w-50 shadow-sm">
+                <span class="input-group-text bg-white border-end-0">🔍</span>
+                <input type="text" id="busquedaRealTime" class="form-control border-start-0" placeholder="Buscar por nombre..." onkeyup="filtrarProductos()">
+            </div>
+        </div>
+
+        <div class="mb-4 d-flex flex-wrap gap-2">
+            <button class="btn btn-sm btn-dark rounded-pill px-3 btn-filter active" onclick="filtrarCategoria('todas', this)">Todas</button>
+            @foreach (var cat in categorias) {
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 btn-filter" onclick="filtrarCategoria('@cat', this)">@cat</button>
+            }
+        </div>
+
+        <div class="row" id="gridProductos" style="max-height: 70vh; overflow-y: auto;">
+            @foreach (var item in Model) {
+                <div class="col-lg-4 col-md-6 mb-4 item-producto" data-categoria="@item.Categoria?.nombre">
+                    <div class="card h-100 border-0 shadow-sm" style="background-color: #F5E6D3; border-radius: 15px;">
+                        @if (!string.IsNullOrEmpty(item.imagen)) {
+                            <img src="~/img/productos/@item.imagen" class="card-img-top" style="height: 140px; object-fit: cover; border-radius: 15px 15px 0 0;">
+                        }
+                        <div class="card-body text-center p-3">
+                            <h6 class="fw-bold mb-1 text-dark nombre-prod">@item.nombre</h6>
+                            <h5 class="fw-bold" style="color: #28A745;">Bs. @item.precio_venta</h5>
+                            <button class="btn btn-sm w-100 mt-2 shadow-sm btn-agregar" style="background-color: #6F4E37; color: white;" 
+                                    onclick="agregarAlPedido(@item.id_producto, '@item.nombre', @item.precio_venta.ToString().Replace(',', '.'))">
+                                AGREGAR +
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+            <div class="card-header text-center py-3" style="background-color: #6F4E37; color: white; border-radius: 15px 15px 0 0;">
+                <h5 class="mb-0 fw-bold">PEDIDO ACTUAL</h5>
+            </div>
+            <div class="card-body p-0" style="min-height: 400px;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr class="small text-uppercase">
+                            <th class="ps-3">Item</th>
+                            <th class="text-center">Cant.</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaPedido"></tbody>
+                </table>
+                <div id="mensajeVacio" class="text-center mt-5 text-muted">
+                    <p>No hay productos seleccionados</p>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top-0 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="h5 mb-0 fw-bold">TOTAL:</span>
+                    <span class="h4 mb-0 fw-bold text-success" id="granTotal">Bs. 0.00</span>
+                </div>
+                <button class="btn btn-success btn-lg w-100 fw-bold shadow" id="btnConfirmar" disabled onclick="confirmarVenta()">
+                    CONFIRMAR VENTA
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let carrito = [];
+
+    function agregarAlPedido(id, nombre, precio) {
+        const itemExistente = carrito.find(p => p.id === id);
+        if (itemExistente) {
+            itemExistente.cantidad++;
+        } else {
+            carrito.push({ id, nombre, precio: parseFloat(precio), cantidad: 1 });
+        }
+        actualizarInterfaz();
+    }
+
+    function eliminarItem(id) {
+        carrito = carrito.filter(p => p.id !== id);
+        actualizarInterfaz();
+    }
+
+    function actualizarInterfaz() {
+        const tabla = document.getElementById('listaPedido');
+        const totalTexto = document.getElementById('granTotal');
+        const btn = document.getElementById('btnConfirmar');
+        const mensaje = document.getElementById('mensajeVacio');
+        
+        tabla.innerHTML = "";
+        let sumaTotal = 0;
+
+        carrito.forEach(p => {
+            const subtotal = p.precio * p.cantidad;
+            sumaTotal += subtotal;
+            tabla.innerHTML += `
+                <tr class="small">
+                    <td class="ps-3 fw-bold">${p.nombre}</td>
+                    <td class="text-center">${p.cantidad}</td>
+                    <td class="fw-bold">Bs. ${subtotal.toFixed(2)}</td>
+                    <td class="text-end pe-2">
+                        <button class="btn btn-sm text-danger" onclick="eliminarItem(${p.id})">✕</button>
+                    </td>
+                </tr>`;
+        });
+
+        totalTexto.innerText = `Bs. ${sumaTotal.toFixed(2)}`;
+        btn.disabled = carrito.length === 0;
+        mensaje.classList.toggle('d-none', carrito.length > 0);
+    }
+
+    function filtrarProductos() {
+        const query = document.getElementById('busquedaRealTime').value.toLowerCase();
+        const items = document.getElementsByClassName('item-producto');
+        Array.from(items).forEach(item => {
+            const nombre = item.querySelector('.nombre-prod').innerText.toLowerCase();
+            item.style.display = nombre.includes(query) ? "block" : "none";
+        });
+    }
+
+    function filtrarCategoria(cat, btn) {
+        document.querySelectorAll('.btn-filter').forEach(b => {
+            b.classList.remove('btn-dark');
+            b.classList.add('btn-outline-secondary');
+        });
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-dark');
+
+        const items = document.getElementsByClassName('item-producto');
+        Array.from(items).forEach(item => {
+            const categoriaProd = item.getAttribute('data-categoria');
+            item.style.display = (cat === 'todas' || categoriaProd === cat) ? "block" : "none";
+        });
+    }
+
+    async function confirmarVenta() {
+        if (carrito.length === 0) return;
+        const btn = document.getElementById('btnConfirmar');
+        btn.disabled = true;
+        btn.innerText = "PROCESANDO...";
+
+        const datosVenta = {
+            id_usuario: 1, 
+            carrito: carrito.map(p => ({
+                id_producto: p.id,
+                cantidad: p.cantidad,
+                precio_unitario: p.precio,
+                subtotal: p.precio * p.cantidad
+            }))
+        };
+
+        try {
+            const respuesta = await fetch('/Venta/ProcesarVenta', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datosVenta)
+            });
+
+            const resultado = await respuesta.json();
+
+            if (resultado.success) {
+                imprimirTicket(carrito); // Pasar carrito antes de borrarlo
+                alert("Venta registrada con éxito.");
+                carrito = [];
+                actualizarInterfaz();
+            } else {
+                alert("Error: " + resultado.message);
+            }
+        } catch (error) {
+            alert("Error de conexión con el servidor.");
+        } finally {
+            btn.disabled = carrito.length === 0;
+            btn.innerText = "CONFIRMAR VENTA";
+        }
+    }
+
+    function imprimirTicket(datosCarrito) {
+        const fecha = new Date().toLocaleString();
+        const total = document.getElementById('granTotal').innerText;
+        let filas = datosCarrito.map(p => `
+            <tr>
+                <td>${p.cantidad}</td>
+                <td>${p.nombre}</td>
+                <td align="right">Bs. ${(p.precio * p.cantidad).toFixed(2)}</td>
+            </tr>`).join('');
+
+        let contenido = `<html><body style="font-family:monospace;width:300px;">
+            <h2 style="text-align:center;">☕ COFFEE PLACE</h2>
+            <hr><p>Fecha: ${fecha}</p><hr>
+            <table style="width:100%">${filas}</table>
+            <hr><h3 style="text-align:right;">TOTAL: ${total}</h3>
+            <button onclick="window.print()">IMPRIMIR</button></body></html>`;
+
+        const win = window.open('', '', 'height=600,width=400');
+        win.document.write(contenido);
+        win.document.close();
+    }
+</script>

@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Coffee Place</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        :root {
+            --cafe-oscuro: #6F4E37;
+            --crema: #F5E6D3;
+            --exito: #28A745;
+        }
+        .navbar { background-color: var(--cafe-oscuro) !important; }
+        .navbar-brand, .nav-link { color: white !important; font-weight: bold; }
+        .nav-link:hover { color: var(--crema) !important; }
+        body { background-color: #FFFFFF; color: #333; }
+        .footer { border-top: 1px solid var(--crema); }
+        .user-badge { 
+            background-color: rgba(255,255,255,0.1); 
+            border-radius: 20px; 
+            padding: 5px 15px; 
+            color: white; 
+            font-size: 0.85rem; 
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="AuthCtrl" asp-action="Login">
+                    ☕ COFFEE PLACE
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        @if (TempData["UserRol"] != null)
+                        {
+                            var rolRaw = TempData["UserRol"]?.ToString();
+                            var rol = !string.IsNullOrEmpty(rolRaw) ? rolRaw.ToLower() : "";
+                            TempData.Keep(); 
+
+                            if (rol == "administrador")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Prod" asp-action="Index">📦 Inventario</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Auth" asp-action="Usuarios">👥 Usuarios</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Prod" asp-action="Reportes">📊 Reportes</a>
+                                </li>
+                            }
+                            else if (rol == "cajero")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Prod" asp-action="CajeroIndex">🛒 Realizar Pedido</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-3">
+                        @if (TempData["UserName"] != null)
+                        {
+                            <div class="user-badge">
+                                <span>👤 @TempData["UserName"] (@(TempData["UserRol"]?.ToString() ?? "Invitado"))</span>
+                            </div>
+                            <a class="btn btn-sm btn-outline-light" asp-controller="Auth" asp-action="Logout">Cerrar Sesión</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-sm btn-outline-light" asp-controller="Auth" asp-action="Login">Iniciar Sesión</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer text-muted py-3 mt-5">
+        <div class="container text-center small">
+            &copy; 2026 - Coffee Place - <span style="color: var(--cafe-oscuro); font-weight: bold;">Calidad en cada grano</span>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

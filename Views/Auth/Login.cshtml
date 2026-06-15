@@ -1,0 +1,44 @@
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Login - Coffee Place</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body { background-color: #F5E6D3; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .login-container { max-width: 400px; margin-top: 8%; }
+        .card { border: none; border-radius: 15px; border-top: 8px solid #6F4E37; }
+        .btn-coffee { background-color: #6F4E37; color: white; transition: 0.3s; }
+        .btn-coffee:hover { background-color: #8B6F47; color: white; }
+        .logo-img { width: 120px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container d-flex justify-content-center">
+        <div class="login-container w-100">
+            <div class="card shadow-lg p-4">
+                <div class="text-center">
+                    <h1 style="color: #6F4E37; font-weight: bold;">☕ COFFEE PLACE</h1>
+                    
+                </div>
+                <form asp-action="Login" method="post" class="mt-4">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre de Usuario</label>
+                        <input type="text" name="user" class="form-control" placeholder="Ej: admin_01" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contraseña</label>
+                        <input type="password" name="pass" class="form-control" placeholder="••••••••" required />
+                    </div>
+                    @if (ViewBag.Error != null) {
+                        <div class="alert alert-danger py-2 small">@ViewBag.Error</div>
+                    }
+                    <button type="submit" class="btn btn-coffee w-100 py-2 fw-bold">INICIAR SESIÓN</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

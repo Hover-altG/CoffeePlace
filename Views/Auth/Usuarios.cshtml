@@ -1,0 +1,124 @@
+@model IEnumerable<CoffeePlace.Models.User>
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="color: #6F4E37; font-weight: bold;">👥 Gestión de Usuarios</h2>
+    <button class="btn shadow-sm text-white fw-bold" style="background-color: #28A745;" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
+        + AGREGAR USUARIO
+    </button>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead style="background-color: #F5E6D3; color: #6F4E37;">
+                <tr>
+                    <th>Nombre de Usuario</th>
+                    <th>Rol</th>
+                    <th>Fecha de Registro</th>
+                    <th>Estado</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                    @(item.nombre_usuario.Substring(0, 1).ToUpper())
+                                </div>
+                                <strong>@item.nombre_usuario</strong>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge @(item.rol.ToLower() == "administrador" ? "bg-dark" : "bg-info text-dark")">
+                                @item.rol.ToUpper()
+                            </span>
+                        </td>
+                        <td>@item.fecha_registro.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <form asp-action="ToggleEstado" method="post">
+                                <input type="hidden" name="id" value="@item.id_usuario" />
+                                <button type="submit" class="badge border-0 @(item.estado ? "bg-success" : "bg-danger")" style="cursor:pointer">
+                                    @(item.estado ? "Activo" : "Desactivado")
+                                </button>
+                            </form>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-2">
+                                <form asp-action="DeleteUser" method="post" onsubmit="return confirm('¿Está seguro de eliminar permanentemente este usuario?')">
+                                    <input type="hidden" name="id" value="@item.id_usuario" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #6F4E37; color: white;">
+                <h5 class="modal-title">Registrar Nuevo Personal</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="CreateUser" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre de Usuario</label>
+                        <input type="text" name="nombre_usuario" class="form-control" placeholder="Ej: maria_cafe" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contraseña Provisional</label>
+                        <input type="password" name="contraseña" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Rol en el Sistema</label>
+                        <select name="rol" class="form-select" required>
+                            <option value="">-- Seleccione Rol --</option>
+                            <option value="administrador">Administrador</option>
+                            <option value="cajero">Cajero</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Estado Inicial</label>
+                        <select name="estado" class="form-select">
+                            <option value="true">Activo</option>
+                            <option value="false">Desactivado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: #F5E6D3;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn" style="background-color: #6F4E37; color: white;">Crear Cuenta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

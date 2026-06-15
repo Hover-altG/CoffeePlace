@@ -1,0 +1,55 @@
+@model IEnumerable<CoffeePlace.Models.Prod>
+@{
+    ViewData["Title"] = "Reportes";
+}
+
+<div class="container mt-4">
+    <h2 style="color: #6F4E37; font-weight: bold;">📊 Reportes del Sistema</h2>
+    <hr />
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow-sm border-0 p-3">
+                <h6>Ventas Estimadas</h6>
+                <h3>Bs. @ViewBag.VentasSimuladas</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow-sm border-0 p-3">
+                <h6>Productos Activos</h6>
+                <h3>@ViewBag.TotalStock</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white shadow-sm border-0 p-3">
+                <h6>Total Inventario</h6>
+                <h3>@ViewBag.TotalProds</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead style="background-color: #F5E6D3;">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td>@item.nombre</td>
+                            <td>@item.Categoria?.nombre</td>
+                            <td>Bs. @item.precio_venta</td>
+                            <td>@(item.estado ? "Disponible" : "Agotado")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

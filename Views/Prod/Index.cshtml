@@ -1,0 +1,206 @@
+@model IEnumerable<CoffeePlace.Models.Prod>
+@{
+    ViewData["Title"] = "Gestión de Productos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="color: #6F4E37; font-weight: bold;">Gestión de Inventario</h2>
+    <button class="btn shadow-sm" style="background-color: #28A745; color: white; font-weight: bold;" data-bs-toggle="modal" data-bs-target="#modalNuevoProducto">
+        + AGREGAR PRODUCTO
+    </button>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead style="background-color: #F5E6D3; color: #6F4E37;">
+                <tr>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th style="width: 150px;">Precio (Bs.)</th>
+                    <th>Estado</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.imagen))
+                            {
+                                <img src="~/img/productos/@item.imagen" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded text-center py-2" style="width: 50px; height: 50px;">☕</div>
+                            }
+                        </td>
+                        <td><strong>@item.nombre</strong><br><small class="text-muted">@item.descripcion</small></td>
+                        <td><span class="badge bg-light text-dark border">@item.Categoria?.nombre</span></td>
+                        <td>
+                            <form asp-action="UpdPrecio" method="post" class="d-flex gap-1">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.id_producto" />
+                                <input type="number" step="0.01" name="precio_venta" value="@item.precio_venta" class="form-control form-control-sm fw-bold text-success" />
+                                <button type="submit" class="btn btn-sm btn-outline-success">ok</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form asp-action="CambiarEstado" method="post">
+                                <input type="hidden" name="id" value="@item.id_producto" />
+                                <button type="submit" class="badge border-0 @(item.estado ? "bg-success" : "bg-danger")" style="cursor:pointer">
+                                    @(item.estado ? "Activo" : "Inactivo")
+                                </button>
+                            </form>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <button class="btn btn-sm btn-editar" 
+                                        style="background-color: #FFC107; color: #333;"
+                                        data-id="@item.id_producto"
+                                        data-nombre="@item.nombre"
+                                        data-precio="@item.precio_venta"
+                                        data-desc="@item.descripcion"
+                                        data-cat="@item.id_categoria">
+                                    Editar
+                                </button>
+
+                                <form asp-action="Delete" method="post" onsubmit="return confirm('¿Está seguro de eliminar este producto?')">
+                                    <input type="hidden" name="id" value="@item.id_producto" />
+                                    <button type="submit" class="btn btn-sm" style="background-color: #DC3545; color: white;">Eliminar</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNuevoProducto" tabindex="-1" aria-labelledby="nuevoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #6F4E37; color: white;">
+                <h5 class="modal-title" id="nuevoLabel">Nuevo Producto Coffee Place</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre del Producto</label>
+                        <input type="text" name="nombre" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Categoría</label>
+                        <select name="id_categoria" class="form-select" asp-items="ViewBag.Categorias" required>
+                            <option value="">-- Seleccione una categoría --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción</label>
+                        <textarea name="descripcion" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Precio de Venta (Bs.)</label>
+                            <input type="number" step="0.01" name="precio_venta" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Estado Inicial</label>
+                            <select name="estado" class="form-select">
+                                <option value="true">Activo</option>
+                                <option value="false">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Imagen del Producto</label>
+                        <input type="file" name="foto" class="form-control" accept="image/*" />
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: #F5E6D3;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn" style="background-color: #6F4E37; color: white;">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditarProducto" tabindex="-1" aria-labelledby="editarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #FFC107; color: #333;">
+                <h5 class="modal-title" id="editarLabel">Actualizar Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id_producto" id="edit_id" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre</label>
+                        <input type="text" name="nombre" id="edit_nombre" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Categoría</label>
+                        <select name="id_categoria" id="edit_categoria" class="form-select" asp-items="ViewBag.Categorias" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción</label>
+                        <textarea name="descripcion" id="edit_descripcion" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Precio de Venta (Bs.)</label>
+                        <input type="number" step="0.01" name="precio_venta" id="edit_precio" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cambiar Imagen (Opcional)</label>
+                        <input type="file" name="foto" class="form-control" accept="image/*" />
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: #F5E6D3;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning fw-bold">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Manejador para el botón EDITAR
+            $(".btn-editar").on("click", function () {
+                var id = $(this).data("id");
+                var nombre = $(this).data("nombre");
+                var precio = $(this).data("precio");
+                var desc = $(this).data("desc");
+                var cat = $(this).data("cat");
+
+                // Asignar valores al modal de edición
+                $("#edit_id").val(id);
+                $("#edit_nombre").val(nombre);
+                $("#edit_precio").val(precio);
+                $("#edit_descripcion").val(desc);
+                $("#edit_categoria").val(cat);
+
+                // Mostrar el modal de edición manualmente para evitar conflictos
+                $("#modalEditarProducto").modal("show");
+            });
+        });
+    </script>
+}
