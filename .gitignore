@@ -1,0 +1,39 @@
+# Build folders
+bin/
+obj/
+
+# Visual Studio files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Rider files
+.idea/
+*.sln.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# NuGet files
+*.nupkg
+packages/
+
+# ASP.NET files
+*.vspscc
+*.vssscc
+
+# JetBrains Rider
+.idea/
+
+# Generated files
+*.cache
+*.bak
+*.swp
