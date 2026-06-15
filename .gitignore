@@ -1,39 +1,105 @@
-# Build folders
+# Build output
 bin/
 obj/
 
-# Visual Studio files
+# User-specific files
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
+
+# Visual Studio Code workspace files
+.vscode/
+
+# Visual Studio cache and database
 .vs/
 
 # Rider files
 .idea/
 *.sln.iml
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs and temporary files
-*.log
-*.tmp
-*.temp
-
-# NuGet files
-*.nupkg
-packages/
-
 # ASP.NET files
 *.vspscc
 *.vssscc
 
-# JetBrains Rider
+# IIS Express
+/.vs/*
+
+# NuGet packages
+*.nupkg
+packages/
+
+# Package lock files
+project.lock.json
+project.fragment.lock.json
+
+# ASP.NET temporary files
+*.dbmdl
+*.bak
+*.log
+*.pidb
+*.pdb
+*.cache
+*.orig
+*.log
+*.vsix
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon
+
+# npm / yarn
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# User secrets
+secrets.json
+
+# JetBrains
+*.iws
+*.iml
+
+# Auto-generated files
+*.tmp
+*.temp
+
+# Dotnet publish output
+publish/
+
+# Rider workspace
 .idea/
 
-# Generated files
-*.cache
-*.bak
+# Crash dumps
+*.dump
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Windows image file caches
+Thumbs.db
+Desktop.ini
+
+# Folder config
+Desktop.ini
+
+# Files created by Visual Studio build
+TestResults/
+
+# Temporary files
 *.swp
+*.swo
+*.~*
+
+# Bundler packages
+.bundle/
+
+# R# files
+_ReSharper*/
+*.[Rr]e[Ss]harper*
+
+# Allow wwwroot and library files if they are part of your app
